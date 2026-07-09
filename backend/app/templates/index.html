@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartBot - Panel Administrativo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #f0f4f8; color: #1e2a3a; }
+
+        #login-screen {
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh;
+            background: linear-gradient(160deg, #0a1628 0%, #1a3558 50%, #0d2444 100%);
+        }
+        .login-box {
+            background: white; padding: 48px 44px; border-radius: 16px;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.4); width: 400px;
+        }
+        .login-header { text-align: center; margin-bottom: 32px; }
+        .login-header .brand-icon {
+            width: 56px; height: 56px; background: linear-gradient(135deg, #1a3558, #2d5986);
+            border-radius: 14px; margin: 0 auto 16px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .login-header .brand-icon svg { width: 28px; height: 28px; fill: white; }
+        .login-header h2 { font-size: 22px; font-weight: 700; color: #1a3558; }
+        .login-header p { font-size: 13px; color: #8a9bb0; margin-top: 4px; }
+        .form-field { margin-bottom: 16px; }
+        .form-field label { display: block; font-size: 12px; font-weight: 600; color: #4a6080; margin-bottom: 6px; letter-spacing: 0.5px; text-transform: uppercase; }
+        .form-field input {
+            width: 100%; padding: 12px 16px; border: 1.5px solid #dce4ee;
+            border-radius: 10px; font-size: 14px; font-family: inherit;
+            transition: all 0.2s; background: #f8fafc; color: #1e2a3a;
+        }
+        .form-field input:focus { outline: none; border-color: #2d5986; background: white; box-shadow: 0 0 0 3px rgba(45,89,134,0.1); }
+        .login-btn {
+            width: 100%; padding: 13px; margin-top: 8px;
+            background: linear-gradient(135deg, #1a3558, #2d5986);
+            color: white; border: none; border-radius: 10px;
+            font-size: 14px; font-weight: 600; cursor: pointer;
+            font-family: inherit; transition: opacity 0.2s; letter-spacing: 0.3px;
+        }
+        .login-btn:hover { opacity: 0.9; }
+        .error-msg { color: #c0392b; text-align: center; margin-top: 14px; font-size: 13px; min-height: 18px; }
+
+        #dashboard { display: none; min-height: 100vh; }
+
+        .navbar {
+            background: linear-gradient(135deg, #0a1628, #1a3558);
+            color: white; padding: 0 28px;
+            display: flex; justify-content: space-between; align-items: center;
+            height: 60px; box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+        }
+        .navbar-brand { display: flex; align-items: center; gap: 12px; }
+        .navbar-brand .icon {
+            width: 34px; height: 34px; background: rgba(255,255,255,0.15);
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+        }
+        .navbar-brand .icon svg { width: 18px; height: 18px; fill: white; }
+        .navbar-brand span { font-size: 16px; font-weight: 700; letter-spacing: 0.3px; }
+        .navbar-brand small { font-size: 11px; color: rgba(255,255,255,0.55); display: block; font-weight: 400; }
+        .logout-btn {
+            background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.85);
+            border: 1px solid rgba(255,255,255,0.15); padding: 8px 18px;
+            border-radius: 8px; cursor: pointer; font-size: 13px; font-family: inherit;
+            transition: all 0.2s; font-weight: 500;
+        }
+        .logout-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+
+        .tabs {
+            display: flex; background: white;
+            border-bottom: 1px solid #dce4ee; padding: 0 28px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        .tab {
+            padding: 16px 22px; cursor: pointer; font-size: 13px; font-weight: 500;
+            color: #7a8fa6; border-bottom: 3px solid transparent;
+            transition: all 0.2s; letter-spacing: 0.2px;
+        }
+        .tab:hover { color: #1a3558; }
+        .tab.active { color: #1a3558; border-bottom-color: #2d5986; font-weight: 600; }
+
+        .content { padding: 28px; max-width: 1200px; margin: 0 auto; }
+        .section { display: none; }
+        .section.active { display: block; }
+
+        .page-header { margin-bottom: 24px; }
+        .page-header h1 { font-size: 20px; font-weight: 700; color: #1a3558; }
+        .page-header p { font-size: 13px; color: #8a9bb0; margin-top: 3px; }
+
+        .card {
+            background: white; border-radius: 12px; padding: 24px;
+            margin-bottom: 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+            border: 1px solid #eaf0f7;
+        }
+        .card-header {
+            font-size: 14px; font-weight: 600; color: #1a3558;
+            margin-bottom: 20px; padding-bottom: 16px;
+            border-bottom: 1px solid #eaf0f7;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .card-header-left { display: flex; align-items: center; gap: 8px; }
+        .card-dot { width: 8px; height: 8px; border-radius: 50%; background: #2d5986; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 600; color: #4a6080; margin-bottom: 6px; letter-spacing: 0.4px; text-transform: uppercase; }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%; padding: 11px 14px; border: 1.5px solid #dce4ee;
+            border-radius: 8px; font-size: 13.5px; font-family: inherit;
+            transition: all 0.2s; background: #f8fafc; color: #1e2a3a;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none; border-color: #2d5986; background: white;
+            box-shadow: 0 0 0 3px rgba(45,89,134,0.08);
+        }
+        .form-group textarea { height: 88px; resize: vertical; }
+        .form-group select { cursor: pointer; }
+
+        .edit-banner {
+            display: none; background: #fff8e6; border: 1px solid #f5d87e;
+            border-radius: 8px; padding: 10px 16px; margin-bottom: 18px;
+            font-size: 13px; color: #8a6200; font-weight: 500;
+        }
+        .edit-banner.visible { display: block; }
+
+        .btn {
+            padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer;
+            font-size: 13px; font-weight: 600; font-family: inherit;
+            transition: all 0.18s; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-primary { background: #1a3558; color: white; }
+        .btn-primary:hover { background: #0f2238; }
+        .btn-outline { background: white; color: #4a6080; border: 1.5px solid #dce4ee; }
+        .btn-outline:hover { background: #f0f4f8; border-color: #b0c0d4; }
+        .btn-danger { background: #fff0f0; color: #c0392b; border: 1px solid #fadadd; }
+        .btn-danger:hover { background: #c0392b; color: white; border-color: #c0392b; }
+        .btn-edit { background: #f0f6ff; color: #1a3558; border: 1px solid #c8d9ee; }
+        .btn-edit:hover { background: #1a3558; color: white; border-color: #1a3558; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+        .btn-group { display: flex; gap: 10px; align-items: center; }
+
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        thead tr { background: #f4f7fb; }
+        th { padding: 11px 16px; text-align: left; font-weight: 600; color: #4a6080; font-size: 12px; letter-spacing: 0.4px; text-transform: uppercase; border-bottom: 1px solid #dce4ee; white-space: nowrap; }
+        td { padding: 13px 16px; border-bottom: 1px solid #f0f4f8; color: #2a3a4a; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tbody tr:hover td { background: #f7faff; }
+        tbody tr.editing td { background: #fffbf0; }
+        .num-col { color: #b0c0d4; font-size: 12px; width: 48px; font-weight: 500; }
+        .text-clip { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .actions { display: flex; gap: 6px; }
+
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; }
+        .badge-general { background: #e8f0fb; color: #1a4a8a; }
+        .badge-academico { background: #e6f4ea; color: #1e6e3a; }
+        .badge-tecnico { background: #fdecea; color: #b71c1c; }
+        .badge-default { background: #f0f4f8; color: #6a7f96; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 24px; }
+        .stat-card {
+            background: white; padding: 28px 24px; border-radius: 12px;
+            border: 1px solid #eaf0f7; box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+            position: relative; overflow: hidden;
+        }
+        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #1a3558, #2d5986); }
+        .stat-card:nth-child(2)::before { background: linear-gradient(90deg, #1a6e3a, #2da05a); }
+        .stat-card:nth-child(3)::before { background: linear-gradient(90deg, #8a4400, #cc6600); }
+        .stat-value { font-size: 38px; font-weight: 700; color: #1a3558; line-height: 1; }
+        .stat-card:nth-child(2) .stat-value { color: #1a6e3a; }
+        .stat-card:nth-child(3) .stat-value { color: #8a4400; }
+        .stat-label { font-size: 13px; color: #8a9bb0; margin-top: 8px; font-weight: 500; }
+
+        .alert { padding: 11px 16px; border-radius: 8px; margin-top: 14px; font-size: 13px; font-weight: 500; }
+        .alert-success { background: #e8f5ec; color: #1e6e3a; border: 1px solid #b8dfc4; }
+        .alert-error { background: #fdecea; color: #b71c1c; border: 1px solid #f5b7b1; }
+
+        .empty-state { text-align: center; padding: 48px 24px; color: #b0c0d4; }
+        .empty-state p { font-size: 14px; margin-top: 8px; }
+    </style>
+</head>
+<body>
+
+<div id="login-screen">
+    <div class="login-box">
+        <div class="login-header">
+            <div class="brand-icon">
+                <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+            </div>
+            <h2>SmartBot Admin</h2>
+            <p>Panel de administracion del sistema</p>
+        </div>
+        <div class="form-field">
+            <label>Usuario</label>
+            <input type="text" id="username" placeholder="Ingresa tu usuario" autocomplete="username" />
+        </div>
+        <div class="form-field">
+            <label>Contrasena</label>
+            <input type="password" id="password" placeholder="Ingresa tu contrasena"
+                   autocomplete="current-password" onkeydown="if(event.key==='Enter') login()" />
+        </div>
+        <button class="login-btn" onclick="login()">Iniciar Sesion</button>
+        <p class="error-msg" id="login-error"></p>
+    </div>
+</div>
+
+<div id="dashboard">
+    <div class="navbar">
+        <div class="navbar-brand">
+            <div class="icon">
+                <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+            </div>
+            <div>
+                <span>SmartBot</span>
+                <small>Panel Administrativo</small>
+            </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">Cerrar Sesion</button>
+    </div>
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('preguntas', this)">Preguntas</div>
+        <div class="tab" onclick="showTab('categorias', this)">Categorias</div>
+        <div class="tab" onclick="showTab('estadisticas', this)">Estadisticas</div>
+        <div class="tab" onclick="showTab('configuracion', this)">Configuracion</div>
+    </div>
+    <div class="content">
+
+        <!-- PREGUNTAS -->
+        <div id="tab-preguntas" class="section active">
+            <div class="page-header">
+                <h1>Preguntas Frecuentes</h1>
+                <p>Gestiona las preguntas y respuestas del sistema</p>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <div class="card-dot"></div>
+                        <span id="form-title">Nueva Pregunta</span>
+                    </div>
+                </div>
+                <div class="edit-banner" id="edit-banner">
+                    Modo edicion activo — modifica los campos y presiona Actualizar para guardar los cambios.
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Pregunta</label>
+                        <input type="text" id="new-question" placeholder="Escribe la pregunta..." />
+                    </div>
+                    <div class="form-group">
+                        <label>Categoria</label>
+                        <select id="new-category"></select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Respuesta</label>
+                    <textarea id="new-answer" placeholder="Escribe la respuesta completa..."></textarea>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="save-btn" onclick="saveQuestion()">Guardar</button>
+                    <button class="btn btn-outline" id="cancel-btn" onclick="cancelEdit()" style="display:none;">Cancelar</button>
+                </div>
+                <div id="q-alert"></div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <div class="card-dot"></div>
+                        <span>Preguntas registradas</span>
+                    </div>
+                    <span id="q-count" style="font-size:12px;color:#8a9bb0;font-weight:400;"></span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="num-col">No.</th>
+                                <th>Pregunta</th>
+                                <th>Respuesta</th>
+                                <th>Categoria</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="questions-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- CATEGORIAS -->
+        <div id="tab-categorias" class="section">
+            <div class="page-header">
+                <h1>Categorias</h1>
+                <p>Organiza las preguntas frecuentes por categoria</p>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <div class="card-dot"></div>
+                        <span id="cat-form-title">Nueva Categoria</span>
+                    </div>
+                </div>
+                <div class="edit-banner" id="cat-edit-banner">
+                    Modo edicion activo — modifica los campos y presiona Actualizar para guardar los cambios.
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" id="new-cat-name" placeholder="Nombre de la categoria..." />
+                    </div>
+                    <div class="form-group">
+                        <label>Descripcion</label>
+                        <input type="text" id="new-cat-desc" placeholder="Descripcion opcional..." />
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="cat-save-btn" onclick="saveCategory()">Guardar</button>
+                    <button class="btn btn-outline" id="cat-cancel-btn" onclick="cancelCatEdit()" style="display:none;">Cancelar</button>
+                </div>
+                <div id="cat-alert"></div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <div class="card-dot"></div>
+                        <span>Categorias registradas</span>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr><th class="num-col">No.</th><th>Nombre</th><th>Descripcion</th><th>Acciones</th></tr>
+                        </thead>
+                        <tbody id="categories-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ESTADISTICAS -->
+        <div id="tab-estadisticas" class="section">
+            <div class="page-header">
+                <h1>Estadisticas</h1>
+                <p>Resumen de actividad del sistema</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-value" id="stat-total">0</div><div class="stat-label">Total de Consultas</div></div>
+                <div class="stat-card"><div class="stat-value" id="stat-questions">0</div><div class="stat-label">Preguntas Registradas</div></div>
+                <div class="stat-card"><div class="stat-value" id="stat-categories">0</div><div class="stat-label">Categorias Activas</div></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><div class="card-header-left"><div class="card-dot"></div><span>Consultas mas frecuentes</span></div></div>
+                <table>
+                    <thead><tr><th>Consulta</th><th>Cantidad</th></tr></thead>
+                    <tbody id="stats-table"></tbody>
+                </table>
+            </div>
+            <div class="card">
+                <div class="card-header"><div class="card-header-left"><div class="card-dot"></div><span>Historial de consultas</span></div></div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr><th>Usuario</th><th>Consulta</th><th>Respuesta</th><th>Fecha</th></tr></thead>
+                        <tbody id="logs-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONFIGURACION -->
+        <div id="tab-configuracion" class="section">
+            <div class="page-header">
+                <h1>Configuracion</h1>
+                <p>Ajustes del bot de Telegram</p>
+            </div>
+            <div class="card">
+                <div class="card-header"><div class="card-header-left"><div class="card-dot"></div><span>Configuracion del Bot</span></div></div>
+                <div class="form-group" style="max-width:420px;">
+                    <label>ID del grupo o chat de Telegram</label>
+                    <input type="text" id="chat-id-input" placeholder="Ejemplo: -1001234567890" />
+                </div>
+                <button class="btn btn-primary" onclick="saveConfig()">Guardar Configuracion</button>
+                <div id="config-alert"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let token = localStorage.getItem("token") || null;
+    let editingId = null;
+    let editingCatId = null;
+    let questionsCache = [];
+    let categoriesCache = [];
+    const API = "";
+
+    window.onload = () => { if (token) showDashboard(); };
+
+    async function login() {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const formData = new FormData();
+        formData.append("username", username);
+        formData.append("password", password);
+        try {
+            const res = await fetch(`${API}/api/auth/login`, { method: "POST", body: formData });
+            const data = await res.json();
+            if (res.ok) {
+                token = data.access_token;
+                localStorage.setItem("token", token);
+                showDashboard();
+            } else {
+                document.getElementById("login-error").textContent = "Credenciales incorrectas. Verifica tu usuario y contrasena.";
+            }
+        } catch {
+            document.getElementById("login-error").textContent = "Error de conexion con el servidor.";
+        }
+    }
+
+    function logout() {
+        token = null;
+        localStorage.removeItem("token");
+        document.getElementById("dashboard").style.display = "none";
+        document.getElementById("login-screen").style.display = "flex";
+    }
+
+    function showDashboard() {
+        document.getElementById("login-screen").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+        loadQuestions();
+        loadCategories();
+        loadConfig();
+    }
+
+    function showTab(tab, el) {
+        document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+        document.getElementById(`tab-${tab}`).classList.add("active");
+        el.classList.add("active");
+        if (tab === "estadisticas") loadStats();
+    }
+
+    function authHeaders() {
+        return { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" };
+    }
+
+    function showAlert(id, msg, type) {
+        const el = document.getElementById(id);
+        el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+        setTimeout(() => el.innerHTML = "", 3000);
+    }
+
+    function getBadge(cat) {
+        if (!cat) return `<span class="badge badge-default">Sin categoria</span>`;
+        const c = cat.toLowerCase();
+        if (c.includes("general")) return `<span class="badge badge-general">${cat}</span>`;
+        if (c.includes("acad")) return `<span class="badge badge-academico">${cat}</span>`;
+        if (c.includes("t")) return `<span class="badge badge-tecnico">${cat}</span>`;
+        return `<span class="badge badge-default">${cat}</span>`;
+    }
+
+    // --- PREGUNTAS ---
+    async function loadQuestions() {
+        const res = await fetch(`${API}/api/questions/`);
+        questionsCache = await res.json();
+        const sorted = [...questionsCache].sort((a, b) => a.id - b.id);
+        document.getElementById("q-count").textContent = `${sorted.length} registradas`;
+        const tbody = document.getElementById("questions-table");
+        if (!sorted.length) {
+            tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><p>No hay preguntas registradas</p></div></td></tr>`;
+            return;
+        }
+        tbody.innerHTML = sorted.map((q, i) => `
+            <tr id="row-${q.id}">
+                <td class="num-col">${i + 1}</td>
+                <td class="text-clip" title="${q.question_text}">${q.question_text}</td>
+                <td class="text-clip" title="${q.answer_text}">${q.answer_text}</td>
+                <td>${getBadge(q.category_name)}</td>
+                <td><div class="actions">
+                    <button class="btn btn-edit btn-sm" onclick="editQuestion(${q.id})">Editar</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteQuestion(${q.id})">Eliminar</button>
+                </div></td>
+            </tr>
+        `).join("");
+    }
+
+    async function editQuestion(id) {
+        const q = questionsCache.find(x => x.id === id);
+        if (!q) { await loadQuestions(); return; }
+        editingId = id;
+        document.getElementById("new-question").value = q.question_text;
+        document.getElementById("new-answer").value = q.answer_text;
+        document.getElementById("new-category").value = q.category_id || "";
+        document.getElementById("form-title").textContent = "Editando Pregunta";
+        document.getElementById("edit-banner").classList.add("visible");
+        document.getElementById("save-btn").textContent = "Actualizar";
+        document.getElementById("cancel-btn").style.display = "inline-flex";
+        document.querySelectorAll("tr.editing").forEach(r => r.classList.remove("editing"));
+        const row = document.getElementById(`row-${id}`);
+        if (row) row.classList.add("editing");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function cancelEdit() {
+        editingId = null;
+        document.getElementById("new-question").value = "";
+        document.getElementById("new-answer").value = "";
+        document.getElementById("new-category").value = "";
+        document.getElementById("form-title").textContent = "Nueva Pregunta";
+        document.getElementById("edit-banner").classList.remove("visible");
+        document.getElementById("save-btn").textContent = "Guardar";
+        document.getElementById("cancel-btn").style.display = "none";
+        document.querySelectorAll("tr.editing").forEach(r => r.classList.remove("editing"));
+    }
+
+    async function saveQuestion() {
+        const questionText = document.getElementById("new-question").value.trim();
+        const answerText = document.getElementById("new-answer").value.trim();
+        const categoryId = parseInt(document.getElementById("new-category").value) || null;
+        if (!questionText || !answerText) {
+            showAlert("q-alert", "Completa los campos de pregunta y respuesta.", "error"); return;
+        }
+        const duplicate = questionsCache.find(q =>
+            q.question_text.toLowerCase() === questionText.toLowerCase() && q.id !== editingId
+        );
+        if (duplicate) {
+            showAlert("q-alert", "Ya existe una pregunta con ese texto.", "error"); return;
+        }
+        const body = { question_text: questionText, answer_text: answerText, category_id: categoryId };
+        if (editingId) {
+            const res = await fetch(`${API}/api/questions/${editingId}`, {
+                method: "PUT", headers: authHeaders(), body: JSON.stringify(body)
+            });
+            if (res.ok) { showAlert("q-alert", "Pregunta actualizada correctamente.", "success"); cancelEdit(); loadQuestions(); }
+        } else {
+            const res = await fetch(`${API}/api/questions/`, {
+                method: "POST", headers: authHeaders(), body: JSON.stringify(body)
+            });
+            if (res.ok) {
+                showAlert("q-alert", "Pregunta creada correctamente.", "success");
+                document.getElementById("new-question").value = "";
+                document.getElementById("new-answer").value = "";
+                loadQuestions();
+            }
+        }
+    }
+
+    async function deleteQuestion(id) {
+        if (!confirm("Esta seguro que desea eliminar esta pregunta?")) return;
+        await fetch(`${API}/api/questions/${id}`, { method: "DELETE", headers: authHeaders() });
+        if (editingId === id) cancelEdit();
+        loadQuestions();
+    }
+
+    // --- CATEGORIAS ---
+    async function loadCategories() {
+        const res = await fetch(`${API}/api/categories/`);
+        categoriesCache = await res.json();
+        document.getElementById("categories-table").innerHTML = categoriesCache.map((c, i) => `
+            <tr id="cat-row-${c.id}">
+                <td class="num-col">${i + 1}</td>
+                <td><strong>${c.name}</strong></td>
+                <td style="color:${c.description ? '#2a3a4a' : '#b0c0d4'}">${c.description || "Sin descripcion"}</td>
+                <td><div class="actions">
+                    <button class="btn btn-edit btn-sm" onclick="editCategory(${c.id})">Editar</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteCategory(${c.id})">Eliminar</button>
+                </div></td>
+            </tr>
+        `).join("");
+        const select = document.getElementById("new-category");
+        select.innerHTML = `<option value="">Sin categoria</option>` +
+            categoriesCache.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+    }
+
+    function editCategory(id) {
+        const c = categoriesCache.find(x => x.id === id);
+        if (!c) return;
+        editingCatId = id;
+        document.getElementById("new-cat-name").value = c.name;
+        document.getElementById("new-cat-desc").value = c.description || "";
+        document.getElementById("cat-form-title").textContent = "Editando Categoria";
+        document.getElementById("cat-edit-banner").classList.add("visible");
+        document.getElementById("cat-save-btn").textContent = "Actualizar";
+        document.getElementById("cat-cancel-btn").style.display = "inline-flex";
+        document.querySelectorAll("tr.editing").forEach(r => r.classList.remove("editing"));
+        const row = document.getElementById(`cat-row-${id}`);
+        if (row) row.classList.add("editing");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function cancelCatEdit() {
+        editingCatId = null;
+        document.getElementById("new-cat-name").value = "";
+        document.getElementById("new-cat-desc").value = "";
+        document.getElementById("cat-form-title").textContent = "Nueva Categoria";
+        document.getElementById("cat-edit-banner").classList.remove("visible");
+        document.getElementById("cat-save-btn").textContent = "Guardar";
+        document.getElementById("cat-cancel-btn").style.display = "none";
+        document.querySelectorAll("tr.editing").forEach(r => r.classList.remove("editing"));
+    }
+
+    async function saveCategory() {
+        const body = {
+            name: document.getElementById("new-cat-name").value.trim(),
+            description: document.getElementById("new-cat-desc").value.trim()
+        };
+        if (!body.name) { showAlert("cat-alert", "El nombre de la categoria es requerido.", "error"); return; }
+        if (editingCatId) {
+            const res = await fetch(`${API}/api/categories/${editingCatId}`, {
+                method: "PUT", headers: authHeaders(), body: JSON.stringify(body)
+            });
+            if (res.ok) {
+                showAlert("cat-alert", "Categoria actualizada correctamente.", "success");
+                cancelCatEdit();
+                loadCategories();
+            }
+        } else {
+            const res = await fetch(`${API}/api/categories/`, {
+                method: "POST", headers: authHeaders(), body: JSON.stringify(body)
+            });
+            if (res.ok) {
+                showAlert("cat-alert", "Categoria creada correctamente.", "success");
+                document.getElementById("new-cat-name").value = "";
+                document.getElementById("new-cat-desc").value = "";
+                loadCategories();
+            }
+        }
+    }
+
+    async function deleteCategory(id) {
+        if (!confirm("Esta seguro que desea eliminar esta categoria?")) return;
+        await fetch(`${API}/api/categories/${id}`, { method: "DELETE", headers: authHeaders() });
+        if (editingCatId === id) cancelCatEdit();
+        loadCategories();
+    }
+
+    // --- ESTADISTICAS ---
+    async function loadStats() {
+        const [sRes, qRes, cRes, lRes] = await Promise.all([
+            fetch(`${API}/api/logs/stats/summary`, { headers: authHeaders() }),
+            fetch(`${API}/api/questions/`),
+            fetch(`${API}/api/categories/`),
+            fetch(`${API}/api/logs/`, { headers: authHeaders() })
+        ]);
+        const stats = await sRes.json();
+        const questions = await qRes.json();
+        const categories = await cRes.json();
+        const logs = await lRes.json();
+        document.getElementById("stat-total").textContent = stats.total_queries;
+        document.getElementById("stat-questions").textContent = questions.length;
+        document.getElementById("stat-categories").textContent = categories.length;
+        document.getElementById("stats-table").innerHTML = stats.top_queries.length
+            ? stats.top_queries.map(q => `<tr><td>${q.query}</td><td><strong>${q.count}</strong></td></tr>`).join("")
+            : `<tr><td colspan="2" style="text-align:center;color:#b0c0d4;padding:24px">Sin datos disponibles</td></tr>`;
+        document.getElementById("logs-table").innerHTML = logs.length
+            ? logs.slice(0, 20).map(l => `<tr>
+                <td>@${l.telegram_user || "Anonimo"}</td>
+                <td class="text-clip" title="${l.query_text}">${l.query_text}</td>
+                <td class="text-clip" title="${l.response_text||''}" style="color:${l.response_text?'#2a3a4a':'#b0c0d4'}">${l.response_text || "Sin respuesta"}</td>
+                <td style="white-space:nowrap;color:#8a9bb0;font-size:12px">${new Date(l.created_at).toLocaleString()}</td>
+              </tr>`).join("")
+            : `<tr><td colspan="4" style="text-align:center;color:#b0c0d4;padding:24px">Sin historial disponible</td></tr>`;
+    }
+
+    // --- CONFIGURACION ---
+    async function loadConfig() {
+        const res = await fetch(`${API}/api/config/`, { headers: authHeaders() });
+        if (res.ok) { const d = await res.json(); document.getElementById("chat-id-input").value = d.chat_id || ""; }
+    }
+
+    async function saveConfig() {
+        const chat_id = document.getElementById("chat-id-input").value.trim();
+        const res = await fetch(`${API}/api/config/`, { method: "PUT", headers: authHeaders(), body: JSON.stringify({ chat_id }) });
+        if (res.ok) showAlert("config-alert", "Configuracion guardada correctamente.", "success");
+    }
+</script>
+</body>
+</html>
