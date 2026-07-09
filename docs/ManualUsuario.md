@@ -1,10 +1,6 @@
 # Manual de Usuario - SmartBot
 
-**Universidad San Carlos de Guatemala**
-**Facultad de Ingenieria - Ingenieria en Ciencias y Sistemas**
-**Inteligencia Artificial 1 - Practica 2**
-**Estudiante:** Pablo Alejandro Marroquin Cutz
-**Carne:** 202200214
+**Autor:** Pablo Alejandro Marroquin Cutz
 
 ---
 
@@ -25,8 +21,8 @@ Antes de ejecutar el proyecto asegurate de tener instalado lo siguiente:
 ### Paso 1 — Clonar el repositorio
 
 ```bash
-git clone https://github.com/PabloMarroquin/-IA1-_VACASJUN2026_PabloMarroquin_202200214.git
-cd -IA1-_VACASJUN2026_PabloMarroquin_202200214/Practica2
+git clone https://github.com/PabloMarroquinnn1/telegram-faq-bot.git
+cd telegram-faq-bot
 ```
 
 ### Paso 2 — Configurar el archivo .env

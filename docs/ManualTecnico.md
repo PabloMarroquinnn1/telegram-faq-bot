@@ -1,10 +1,6 @@
 # Manual Tecnico - SmartBot
 
-**Universidad San Carlos de Guatemala**
-**Facultad de Ingenieria - Ingenieria en Ciencias y Sistemas**
-**Inteligencia Artificial 1 - Practica 2**
-**Estudiante:** Pablo Alejandro Marroquin Cutz
-**Carne:** 202200214
+**Autor:** Pablo Alejandro Marroquin Cutz
 
 ---
 
